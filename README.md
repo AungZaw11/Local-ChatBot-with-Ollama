@@ -1,70 +1,78 @@
-# Getting Started with Create React App
+Local AI Chatbot UI
+A lightweight, local-first chatbot interface built with React that connects directly to a locally running Ollama instance. This allows you to chat with LLMs (like Llama 3 or DeepSeek Coder) without sending your data to the cloud.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This version is specifically tailored for Coders, featuring syntax highlighting for code blocks and a dark theme.
 
-## Available Scripts
+🚀 Features
+Local AI: Connects to Ollama running on your machine.
 
-In the project directory, you can run:
+Streaming Responses: AI responses appear in real-time, token-by-token.
 
-### `npm start`
+Syntax Highlighting: Beautifully formatted code blocks using react-syntax-highlighter.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Markdown Support: Renders rich text, bold, italics, and lists.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Coder-Focused Theme: Dark mode interface inspired by VS Code.
 
-### `npm test`
+Auto-Scroll: Automatically scrolls to the bottom as the AI types.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+📋 Prerequisites
+Before running this project, ensure you have the following installed:
 
-### `npm run build`
+Node.js (v16 or higher)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Ollama: Download and install Ollama
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+An LLM Model: Pull a model suitable for coding (e.g., DeepSeek Coder V2 or Llama 3) via terminal:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Bash
+ollama pull deepseek-coder-v2:lite
+🛠️ Installation & Setup
+Clone or create the project directory:
 
-### `npm run eject`
+Bash
+npx create-react-app local-ai-chatbot
+cd local-ai-chatbot
+Install the required dependencies:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Bash
+npm install ollama react-markdown react-syntax-highlighter
+Replace src/App.js:
+Copy the code provided in the "Coder Edition" section and paste it into your src/App.js file.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Run the application:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Bash
+npm start
+⚙️ Configuration
+By default, the application connects to localhost:11434 (Ollama's default port).
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+To change the model used, edit the handleSubmit function in App.js:
 
-## Learn More
+JavaScript
+const response = await ollama.chat({
+  model: 'deepseek-coder-v2:lite', // Change this to your pulled model name
+  messages: [...chatLog, userMessage],
+  stream: true,
+});
+🖥️ Usage
+Ensure Ollama is running in the background.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Type your question or coding prompt into the text area.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Press Enter to send (or Shift+Enter for a new line).
 
-### Code Splitting
+The AI will respond in real-time.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+📂 Project Structure
+Plaintext
+src/
+├── App.js        # Main application logic and UI
+├── index.css     # Global styles
+└── index.js      # React entry point
+🛑 Troubleshooting
+Error: ENOENT: no such file or directory, open '.../package.json': You are in the wrong folder in your terminal. Use cd to navigate into your project folder.
 
-### Analyzing the Bundle Size
+AI Not Responding: Ensure Ollama is running and you have pulled the model (ollama pull <model-name>) specified in App.js.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Slow Responses: Large models require significant RAM and GPU power. Use ...:lite or smaller quantized models if performance is poor.
