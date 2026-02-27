@@ -51,10 +51,12 @@ To change the model used, edit the handleSubmit function in App.js:
 
 JavaScript
 const response = await ollama.chat({
-  model: 'deepseek-coder-v2:lite', // Change this to your pulled model name
+  model: 'deepseek-coder-v2:lite', <br>
+  Change this to your pulled model name <br>
   messages: [...chatLog, userMessage],
   stream: true,
 });
+<br>
 🖥️ Usage
 Ensure Ollama is running in the background.
 
@@ -66,10 +68,10 @@ The AI will respond in real-time.
 
 📂 Project Structure
 Plaintext
-src/
-├── App.js        # Main application logic and UI
-├── index.css     # Global styles
-└── index.js      # React entry point
+src/ <br>
+├── App.js        # Main application logic and UI <br>
+├── index.css     # Global styles <br>
+└── index.js      # React entry point <br>
 🛑 Troubleshooting
 Error: ENOENT: no such file or directory, open '.../package.json': You are in the wrong folder in your terminal. Use cd to navigate into your project folder.
 
