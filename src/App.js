@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ollama from 'ollama/browser';
 import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 function App() {
   const [input, setInput] = useState('');
@@ -10,7 +8,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
 
-  // Auto Scroll
+  // စာရိုက်တိုင်း အလိုအလျောက် အောက်ဆုံးကို scroll ဆွဲပေးရန်
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatLog]);
@@ -20,26 +18,24 @@ function App() {
     if (!input.trim() || loading) return;
 
     const userMessage = { role: 'user', content: input };
+
+    // User ရဲ့ message နဲ့ AI အတွက် နေရာလွတ် တစ်ခုကို အရင်သတ်မှတ်ပါ
     setChatLog((prev) => [...prev, userMessage, { role: 'assistant', content: '' }]);
     setInput('');
     setLoading(true);
 
     try {
-      // DeepSeek Coder V2 Lite ကို အသုံးပြုခြင်း
       const response = await ollama.chat({
-        model: 'deepseek-coder-v2:lite',
-        messages: [
-          { role: 'system', content: 'You are an expert programmer. Provide efficient and clean code with explanations.' },
-          ...chatLog,
-          userMessage
-        ],
-        stream: true,
+        model: 'llama3',
+        messages: [...chatLog, userMessage],
+        stream: true, // Streaming ကို ဖွင့်လိုက်ခြင်း
       });
 
       for await (const part of response) {
         setChatLog((prev) => {
           const newChatLog = [...prev];
           const lastIndex = newChatLog.length - 1;
+          // AI ရဲ့ စာသားကို တစ်လုံးချင်းစီ ပေါင်းထည့်ပေးခြင်း
           newChatLog[lastIndex] = {
             ...newChatLog[lastIndex],
             content: newChatLog[lastIndex].content + part.message.content,
@@ -49,7 +45,7 @@ function App() {
       }
     } catch (err) {
       console.error(err);
-      alert("Error: Make sure 'ollama run deepseek-coder-v2:lite' is working.");
+      alert("Error: မချိတ်ဆက်နိုင်ပါ။ Ollama ပွင့်မပွင့် ပြန်စစ်ပါ။");
     } finally {
       setLoading(false);
     }
@@ -57,66 +53,32 @@ function App() {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
       <header style={styles.header}>
-        <div style={styles.headerTitle}>🚀 DeepSeek Coder Hub</div>
-        <div style={styles.headerStatus}>{loading ? '● AI is coding...' : '● Ready to Build'}</div>
+        <h2>🤖 Local AI Assistant</h2>
+        <span style={styles.status}>{loading ? '● AI is typing...' : '● Online'}</span>
       </header>
 
-      {/* Chat Display */}
       <div style={styles.chatWindow}>
         {chatLog.map((msg, index) => (
           <div key={index} style={msg.role === 'user' ? styles.userRow : styles.aiRow}>
             <div style={msg.role === 'user' ? styles.userBubble : styles.aiBubble}>
-              <ReactMarkdown
-                components={{
-                  code({ node, inline, className, children, ...props }) {
-                    const match = /language-(\w+)/.exec(className || '');
-                    return !inline && match ? (
-                      <div style={styles.codeContainer}>
-                        <div style={styles.codeHeader}>{match[1]}</div>
-                        <SyntaxHighlighter
-                          style={vscDarkPlus}
-                          language={match[1]}
-                          PreTag="div"
-                          {...props}
-                        >
-                          {String(children).replace(/\n$/, '')}
-                        </SyntaxHighlighter>
-                      </div>
-                    ) : (
-                      <code className={className} style={styles.inlineCode} {...props}>
-                        {children}
-                      </code>
-                    );
-                  }
-                }}
-              >
-                {msg.content}
-              </ReactMarkdown>
+              <ReactMarkdown>{msg.content}</ReactMarkdown>
             </div>
           </div>
         ))}
         <div ref={scrollRef} />
       </div>
 
-      {/* Input Area */}
       <form onSubmit={handleSubmit} style={styles.inputArea}>
-        <textarea
+        <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleSubmit(e);
-            }
-          }}
-          placeholder="Write some code or ask a logic question..."
+          placeholder="မေးချင်တာ ရိုက်ပါ..."
           style={styles.input}
-          rows="2"
+          disabled={loading}
         />
         <button type="submit" disabled={loading || !input.trim()} style={styles.button}>
-          {loading ? '...' : 'SEND'}
+          {loading ? '...' : 'Send'}
         </button>
       </form>
     </div>
@@ -124,21 +86,21 @@ function App() {
 }
 
 const styles = {
-  container: { display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#0d1117', color: '#c9d1d9', fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif' },
-  header: { padding: '15px 25px', backgroundColor: '#161b22', borderBottom: '1px solid #30363d', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  headerTitle: { fontSize: '18px', fontWeight: 'bold', color: '#58a6ff' },
-  headerStatus: { fontSize: '12px', color: '#8b949e' },
-  chatWindow: { flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' },
+  container: { display: 'flex', flexDirection: 'column', height: '95vh', maxWidth: '850px', margin: '10px auto', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', borderRadius: '15px', overflow: 'hidden', backgroundColor: '#ffffff' },
+  header: { background: '#202123', color: 'white', padding: '15px', textAlign: 'center', borderBottom: '2px solid #10a37f' },
+  status: { fontSize: '12px', color: '#10a37f' },
+  chatWindow: { flex: 1, overflowY: 'auto', padding: '20px', backgroundColor: '#f0f2f5', display: 'flex', flexDirection: 'column', gap: '15px' },
   userRow: { display: 'flex', justifyContent: 'flex-end' },
   aiRow: { display: 'flex', justifyContent: 'flex-start' },
-  userBubble: { background: '#238636', color: '#fff', padding: '5px 15px', borderRadius: '12px 12px 2px 12px', maxWidth: '80%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
-  aiBubble: { background: '#161b22', color: '#d1d5db', padding: '5px 18px', borderRadius: '12px 12px 12px 2px', maxWidth: '90%', border: '1px solid #30363d', lineHeight: '1.7' },
-  codeContainer: { margin: '10px 0', borderRadius: '8px', overflow: 'hidden', border: '1px solid #444c56' },
-  codeHeader: { backgroundColor: '#21262d', padding: '5px 15px', fontSize: '12px', color: '#8b949e', borderBottom: '1px solid #30363d', textTransform: 'uppercase' },
-  inlineCode: { backgroundColor: '#2d333b', padding: '2px 5px', borderRadius: '4px', color: '#ff7b72' },
-  inputArea: { display: 'flex', padding: '20px', gap: '15px', backgroundColor: '#161b22', borderTop: '1px solid #30363d' },
-  input: { flex: 1, padding: '12px 15px', borderRadius: '8px', border: '1px solid #30363d', backgroundColor: '#0d1117', color: '#c9d1d9', outline: 'none', resize: 'none', fontSize: '15px' },
-  button: { padding: '0 30px', borderRadius: '8px', border: 'none', backgroundColor: '#238636', color: '#fff', cursor: 'pointer', fontWeight: 'bold', transition: '0.2s' }
+  userBubble: { background: '#007bff', color: 'white', padding: '0 15px', borderRadius: '18px 18px 0 18px', maxWidth: '80%', fontSize: '15px', boxShadow: '0 2px 5px rgba(0,123,255,0.2)' },
+  aiBubble: {
+    background: '#fff', color: '#333', padding: '0 15px', borderRadius: '18px 18px 18px 0',
+    maxWidth: '85%', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', fontSize: '15px', border: '1px solid #ddd', overflowX: 'auto'
+  },
+  inputArea: { display: 'flex', padding: '15px', gap: '10px', background: '#fff', borderTop: '1px solid #eee' },
+  input: { flex: 1, padding: '12px 20px', borderRadius: '25px', border: '1px solid #ddd', outline: 'none', fontSize: '15px' },
+  button: { padding: '0 25px', borderRadius: '25px', border: 'none', background: '#007bff', color: 'white', cursor: 'pointer', fontWeight: 'bold', transition: '0.3s' }
 };
 
 export default App;
+
